@@ -1,0 +1,371 @@
+{
+  "name": "JUMA - Checkpoint 1 - Agente base Jumade",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "e23c0a2e-bcdc-4627-9f7c-3ab0737333b2",
+      "name": "Chat Trigger",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "61f32086-0225-4d16-8870-37f48e52fbc7"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}\n\n[Session_ID: {{ $json.sessionId }}]",
+        "options": {
+          "systemMessage": "# ROL\nSos JUMA, el asistente de soporte y ventas del estudio de videojuegos Jumade. Hablás en español rioplatense, con tono cercano y profesional. No usás lenguaje inclusivo (ni \"x\", ni \"e\", ni \"@\" para generalizar).\n\n# ÁMBITO\nAtendés jugadores y potenciales compradores del juego Jumade y de los demás títulos del estudio. Cubrís:\n- Soporte técnico: bugs, requisitos, instalación, claves de activación.\n- Ventas: precio, plataformas disponibles, fechas de salida publicadas, DLC y descuentos vigentes.\n- Facturación: solo tomás el pedido, lo registrás y lo derivás a una persona del equipo.\n- Prensa y colaboraciones: registrás el contacto y lo derivás.\n\n# OBJETIVO DE LA SESIÓN\n1. Entender qué necesita la persona y clasificar la consulta en una sola categoría: SOPORTE_TECNICO, VENTAS, FACTURACION, PRENSA_COLAB u OTRO.\n2. Responder con información oficial del estudio de forma breve y clara.\n3. Registrar siempre el caso o el lead en la planilla usando la herramienta \"registrar_caso_jumade\".\n\n# REGLAS Y LÍMITES (lo que NO podés hacer)\n- No prometés reembolsos, descuentos no publicados ni fechas de lanzamiento no confirmadas.\n- No enviás correos ni mensajes a terceros; no realizás cobros ni cambios en pedidos.\n- No pedís ni guardás datos de tarjetas, contraseñas ni documentos de identidad.\n- Si no tenés la información, decís literalmente \"No sé\" y ofrecés derivar a una persona del equipo.\n- No inventás datos de productos, precios ni políticas.\n\n# ESCALAMIENTO\nSi detectás alguna de estas señales, cerrás la respuesta indicando que una persona del equipo va a continuar la conversación y registrás el caso con Prioridad \"Alta\" y Estado \"Escalado\": reembolso, cobro duplicado, estafa, chargeback, abogado, denuncia, enojo explícito, prensa o propuesta comercial.\n\n# FORMATO\nRespuestas de máximo 4 oraciones. Sin enlaces inventados. Antes de dar la respuesta final, registrá el caso con la herramienta una sola vez por conversación.",
+          "maxIterations": 8,
+          "returnIntermediateSteps": true
+        }
+      },
+      "id": "618dcedd-8d72-4629-8840-c36f3c88de16",
+      "name": "AI Agent (JUMA)",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        304,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini",
+          "cachedResultName": "gpt-5-mini"
+        },
+        "options": {}
+      },
+      "id": "8eff79db-ecce-46bc-8a11-d45689d89bbc",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        208,
+        240
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "DtjdSQhumfqx4nRw",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Usá esta herramienta para registrar en la planilla de Jumade cada consulta atendida, siempre, una sola vez por conversación, antes de dar la respuesta final. Activala cuando: (1) ya identificaste la categoría de la consulta (SOPORTE_TECNICO, VENTAS, FACTURACION, PRENSA_COLAB u OTRO); (2) la persona describió un problema técnico, un interés de compra, un pedido de facturación o una propuesta de prensa o colaboración, aunque no haya dejado datos de contacto; (3) la consulta debe escalarse a una persona del equipo. Completá todos los campos: Fecha (hoy, formato YYYY-MM-DD), Session_ID (identificador de la conversación), Canal (\"chat\"), Intencion (una de las cinco categorías), Nombre y Email si los dio (si no, \"no informado\"), Producto mencionado (por ejemplo \"Jumade\"; si no se menciona, \"no informado\"), Resumen de 1 a 2 oraciones del caso, Prioridad (\"Alta\" si hay reembolso, reclamo, prensa, propuesta comercial o enojo; \"Normal\" en el resto) y Estado (\"Abierto\" si lo resolvés vos, \"Escalado\" si lo deriva a una persona). No la uses para buscar información ni para responder preguntas: es solo para dejar registro del caso o del lead.",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1YdDaQamADhcmrfGYoTuSH2oLjyp2JKxtlu_sM9fqV58"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Casos"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Fecha": "={{ $fromAI('Fecha', 'Fecha de hoy en formato YYYY-MM-DD', 'string') }}",
+            "Session_ID": "={{ $fromAI('Session_ID', 'Identificador de sesion indicado en el mensaje del usuario entre corchetes como Session_ID', 'string') }}",
+            "Canal": "chat",
+            "Intencion": "={{ $fromAI('Intencion', 'Una de las categorias: SOPORTE_TECNICO, VENTAS, FACTURACION, PRENSA_COLAB u OTRO', 'string') }}",
+            "Nombre": "={{ $fromAI('Nombre', 'Nombre de la persona o la palabra no informado', 'string') }}",
+            "Email": "={{ $fromAI('Email', 'Email de la persona o la palabra no informado', 'string') }}",
+            "Producto": "={{ $fromAI('Producto', 'Juego o producto mencionado o la palabra no informado', 'string') }}",
+            "Resumen": "={{ $fromAI('Resumen', 'Resumen del caso en 1 o 2 oraciones', 'string') }}",
+            "Prioridad": "={{ $fromAI('Prioridad', 'Alta o Normal', 'string') }}",
+            "Estado": "={{ $fromAI('Estado', 'Abierto o Escalado', 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Session_ID",
+              "displayName": "Session_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Canal",
+              "displayName": "Canal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Intencion",
+              "displayName": "Intencion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nombre",
+              "displayName": "Nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Producto",
+              "displayName": "Producto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Resumen",
+              "displayName": "Resumen",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Prioridad",
+              "displayName": "Prioridad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Worker_invocado",
+              "displayName": "Worker_invocado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Parametros_enviados",
+              "displayName": "Parametros_enviados",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Respuesta_worker",
+              "displayName": "Respuesta_worker",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "traceId",
+              "displayName": "traceId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "eaf559ec-8e3f-4f31-8fc8-ae94eb417dc6",
+      "name": "registrar_caso_jumade",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        480,
+        240
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "yjOVMCMozE8kCjVd",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "juanmanueldepaoli@gmail.com",
+        "subject": "=[JUMA] Log de ejecución · {{ $('Chat Trigger').item.json.sessionId }}",
+        "message": "=<h3>JUMA · Reporte de observabilidad</h3>\n<p><b>Fecha:</b> {{ $now.format('yyyy-MM-dd HH:mm') }}<br>\n<b>Session_ID:</b> {{ $('Chat Trigger').item.json.sessionId }}</p>\n<p><b>Mensaje del usuario:</b><br>{{ $('Chat Trigger').item.json.chatInput }}</p>\n<p><b>Respuesta del agente:</b><br>{{ $json.output }}</p>\n<p><b>Pasos intermedios (razonamiento y herramientas):</b></p>\n<pre>{{ JSON.stringify($json.intermediateSteps || [], null, 2) }}</pre>",
+        "options": {}
+      },
+      "id": "ff8fe8c7-4716-495c-b637-e867684f2c62",
+      "name": "Gmail - Log de observabilidad",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        704,
+        0
+      ],
+      "webhookId": "0769475d-fac9-48d3-97e1-f9cabbfb51d1",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "UDNPuSr4w91CsZ0b",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b3753edc-e43b-43ed-b926-e8c31d4956df",
+              "name": "output",
+              "value": "={{ $('AI Agent (JUMA)').item.json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9cb49719-0a46-4f45-93fd-6b812372bb33",
+      "name": "Respuesta al chat",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        944,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 300,
+        "width": 420,
+        "color": 5
+      },
+      "id": "52b15585-ce22-4002-b71a-f1518c8ff008",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -336
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Chat Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent (JUMA)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent (JUMA)": {
+      "main": [
+        [
+          {
+            "node": "Gmail - Log de observabilidad",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "registrar_caso_jumade": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent (JUMA)",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail - Log de observabilidad": {
+      "main": [
+        [
+          {
+            "node": "Respuesta al chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent (JUMA)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "88f20535-7080-4fdd-ad79-30b84685a455",
+  "meta": {
+    "instanceId": "977ae06dd57231045f49d34d38bda72c6bacfa79c28c136b7540e1fc490c06aa"
+  },
+  "nodeGroups": [],
+  "id": "xARQjdSb33iHTQOM",
+  "tags": []
+}
