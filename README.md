@@ -76,3 +76,26 @@ Base **JUMA - Memoria persistente**, tabla **Memoria**, una fila por `Session_ID
 | `Datos_clave` | Texto largo (JSON) | nombre, email, producto, plataforma, ultima_intencion, cantidad_mensajes, ultimo_traceId |
 
 Para importar: crear la base con esas 5 columnas, una credencial OAuth2 de Airtable y reemplazar los IDs de base/tabla en los cuatro nodos de Airtable del Manager.
+
+## Pre-entrega Módulo 4 — Integraciones avanzadas (CRM + Gmail + Slack vía OAuth2)
+
+Carpeta `modulo4/` (detalle completo en [`modulo4/README.md`](modulo4/README.md)). El Manager del Módulo 3 evoluciona a **JUMA - Manager (multi-agente + memoria + integraciones)**: suma una segunda entrada por la casilla de soporte de Gmail, consulta y alta de contactos en HubSpot, respuesta como borrador en el hilo original (Human-in-the-loop) y avisos al canal de Slack `#operaciones-jumade`.
+
+Entregable: **`checkpoint4_juan_manuel_depaoli.json`** (copia en la raíz y en `modulo4/`), exportado desde n8n e importable sin errores.
+
+### Credenciales activas (CRM, Gmail y Slack)
+
+![Sección Credentials de n8n con HubSpot, Gmail y Slack conectadas por OAuth2](modulo4/capturas/01_credenciales_n8n.png)
+
+### Los 4 nodos de la rúbrica
+
+| # | Nodo | Qué previene |
+|---|---|---|
+| ① | `¿Es correo automático?` (IF: regex en asunto, remitente y headers `Auto-Submitted`/`Precedence`) | Bucle infinito de auto-replies |
+| ② | `Buscar contacto en CRM (Look up)` → `¿Contacto existe en CRM?` → `Crear contacto en CRM (Create)` | Duplicados / Error 409 |
+| ③ | `Borrador de respuesta (Create Draft)` (Gmail, en el `threadId` original; no existe ningún nodo de envío) | Enviar sin aprobación humana |
+| ④ | `Limpieza de payload de salida` y `Limpieza de alerta (Slack)` (Set antes de cada nodo de Slack: campos planos, texto recortado, sin headers ni binarios) | Error 400 / saturar el canal |
+
+![Rama de entrada por email con los guardrails ① y ②](modulo4/capturas/03_rama_email_entrada.png)
+
+Test de regresión: email real de soporte → contacto creado en HubSpot, borrador en Gmail, aviso en Slack, log en Sheets y memoria en Airtable; email "Automatic reply: Out of office" → descartado sin tocar CRM ni LLM; chat → camino del M3 intacto.
