@@ -1,0 +1,660 @@
+{
+  "name": "JUMA - Manager (orquestador multi-agente)",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "1d645d1c-8ee5-48c8-815f-c5173396a7e7",
+      "name": "Chat Trigger",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "fe9dd959-12a2-4899-80c3-ca3ec1a7b27f"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Mensaje del usuario: {{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "Sos el clasificador de intenciones del Manager de JUMA (estudio de videojuegos Jumade).\nClasificá el mensaje del usuario en UNA sola categoría de esta taxonomía cerrada:\n- SOPORTE_TECNICO: bugs, crasheos, requisitos, instalación, claves de activación, rendimiento.\n- VENTAS: precio, cómo comprar, plataformas, fecha de salida, DLC, descuentos, bundles.\n- FACTURACION: reembolsos, cobros duplicados, cambios de pedido, chargeback.\n- PRENSA_COLAB: prensa, streamers, publishers, propuestas comerciales.\n- OTRO: cualquier cosa fuera de alcance o ambigua.\nSi dudás entre dos, elegí la de mayor riesgo (FACTURACION > SOPORTE_TECNICO > VENTAS > PRENSA_COLAB > OTRO).\nRespondé únicamente con JSON: {\"intencion\": \"<categoría>\", \"motivo\": \"<una oración>\"}.\nNo uses herramientas. No agregues texto fuera del JSON.",
+          "maxIterations": 3
+        }
+      },
+      "id": "84cb6f44-e091-4423-bbd5-8119deec35c1",
+      "name": "Clasificador de intención",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        240,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini",
+          "cachedResultName": "gpt-5-mini"
+        },
+        "options": {}
+      },
+      "id": "0af6ff4d-3606-4d1d-83e3-52b93c3bfc8b",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        208,
+        224
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "DtjdSQhumfqx4nRw",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "22d14301-bee4-4c09-a2d3-6e90fe60a1ed",
+              "name": "traceId",
+              "value": "={{ $execution.id }}-{{ $('Chat Trigger').item.json.sessionId.slice(0,8) }}",
+              "type": "string"
+            },
+            {
+              "id": "b8c9a8a1-6693-4145-9f87-3d3c250dfd07",
+              "name": "session_id",
+              "value": "={{ $('Chat Trigger').item.json.sessionId }}",
+              "type": "string"
+            },
+            {
+              "id": "eecbfd1e-33d8-4d3f-8691-fa73d0e4c832",
+              "name": "intencion",
+              "value": "={{ (()=>{ try { return JSON.parse(String($json.output).replace(/```json|```/g,'').trim()).intencion } catch(e) { return 'OTRO' } })() }}",
+              "type": "string"
+            },
+            {
+              "id": "4eacd6c0-14a6-4210-8f7f-fba4a41c7c9b",
+              "name": "motivo",
+              "value": "={{ (()=>{ try { return JSON.parse(String($json.output).replace(/```json|```/g,'').trim()).motivo } catch(e) { return 'JSON inválido del clasificador' } })() }}",
+              "type": "string"
+            },
+            {
+              "id": "460b7bdb-eb32-44c5-8b83-a484e7c36792",
+              "name": "mensaje",
+              "value": "={{ $('Chat Trigger').item.json.chatInput }}",
+              "type": "string"
+            },
+            {
+              "id": "da15006e-6b68-4374-ba33-afe67d71ae62",
+              "name": "contexto",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fe57c036-a36f-4651-ace8-2fea37c8701b",
+      "name": "Limpieza de payload",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        608,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "5c9a99c3-57a1-418c-97d9-08558030f42a",
+                    "leftValue": "={{ $json.intencion }}",
+                    "rightValue": "SOPORTE_TECNICO",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "SOPORTE_TECNICO"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "ccc11ad3-19d8-46c4-a207-26cc6f770bb9",
+                    "leftValue": "={{ $json.intencion }}",
+                    "rightValue": "VENTAS",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "VENTAS"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "FALLBACK_HUMANO"
+        }
+      },
+      "id": "11418974-f34d-4258-87d8-7d45889a6261",
+      "name": "Router por intención",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        864,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "7p0kknA18lM9wHQm",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/7p0kknA18lM9wHQm",
+          "cachedResultName": "JUMA - Worker Soporte Técnico"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "e4507b43-d764-4934-b010-cfb20f685e55",
+      "name": "Execute Worker Soporte",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1152,
+        -208
+      ],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "dr2haYdDta6CKMel",
+          "cachedResultName": "JUMA - Worker Ventas (calificación de leads)"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "454fb10c-b5b3-4991-b2c8-a354db3421d5",
+      "name": "Execute Worker Ventas",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1152,
+        0
+      ],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "sendTo": "juanmanueldepaoli@gmail.com",
+        "subject": "=[JUMA] Escalado a supervisor humano · {{ $('Limpieza de payload').item.json.intencion }} · {{ $('Limpieza de payload').item.json.traceId }}",
+        "message": "=<h3>Caso derivado a supervisor humano</h3><p><b>traceId:</b> {{ $('Limpieza de payload').item.json.traceId }}<br><b>Session_ID:</b> {{ $('Limpieza de payload').item.json.session_id }}<br><b>Intención:</b> {{ $('Limpieza de payload').item.json.intencion }}<br><b>Motivo del clasificador:</b> {{ $('Limpieza de payload').item.json.motivo }}</p><p><b>Mensaje del usuario:</b><br>{{ $('Limpieza de payload').item.json.mensaje }}</p><p>Este caso no se delega a ningún Worker automático: requiere intervención de una persona del equipo de Jumade.</p>",
+        "options": {}
+      },
+      "id": "f3cbddc0-4d25-4872-82f1-cbcab7f56621",
+      "name": "Alerta a supervisor humano",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1152,
+        240
+      ],
+      "webhookId": "9f9529c5-6754-41ce-ac78-1f62bf5c6b75",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "UDNPuSr4w91CsZ0b",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "945c3c29-1477-4a4b-947a-1360f1cbb61a",
+              "name": "status",
+              "value": "escalated",
+              "type": "string"
+            },
+            {
+              "id": "fa5c2262-59f5-4378-859d-15b0a9ea0d35",
+              "name": "intencion",
+              "value": "={{ $('Limpieza de payload').item.json.intencion }}",
+              "type": "string"
+            },
+            {
+              "id": "d1eaec8e-5d34-40d2-b715-bf1af590111b",
+              "name": "traceId",
+              "value": "={{ $('Limpieza de payload').item.json.traceId }}",
+              "type": "string"
+            },
+            {
+              "id": "487e71ca-2d9f-4b04-bafe-3e36ae07ec17",
+              "name": "respuesta",
+              "value": "Gracias por escribir. Tu consulta requiere la atención de una persona del equipo de Jumade: ya quedó registrada y te vamos a responder a la brevedad.",
+              "type": "string"
+            },
+            {
+              "id": "a32c7643-7b80-4c04-8a46-b113c349cade",
+              "name": "accion",
+              "value": "escalado_a_humano",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "332370a4-ef7c-433d-a48c-e9fb9de38820",
+      "name": "Respuesta fallback",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1408,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1YdDaQamADhcmrfGYoTuSH2oLjyp2JKxtlu_sM9fqV58"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Casos"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Fecha": "={{ $now.format('yyyy-MM-dd HH:mm') }}",
+            "Session_ID": "={{ $('Chat Trigger').item.json.sessionId }}",
+            "Canal": "chat",
+            "Intencion": "={{ $('Limpieza de payload').item.json.intencion }}",
+            "Resumen": "={{ $('Limpieza de payload').item.json.mensaje }}",
+            "Prioridad": "={{ ['FACTURACION','PRENSA_COLAB','OTRO'].includes($('Limpieza de payload').item.json.intencion) ? 'Alta' : 'Normal' }}",
+            "Estado": "={{ $json.status === 'success' ? 'Abierto' : 'Escalado' }}",
+            "Worker_invocado": "={{ ({SOPORTE_TECNICO:'JUMA - Worker Soporte Técnico', VENTAS:'JUMA - Worker Ventas (calificación de leads)'})[$('Limpieza de payload').item.json.intencion] || 'Ninguno - fallback a supervisor humano' }}",
+            "Parametros_enviados": "={{ JSON.stringify($('Limpieza de payload').item.json) }}",
+            "Respuesta_worker": "={{ JSON.stringify($json) }}",
+            "traceId": "={{ $('Limpieza de payload').item.json.traceId }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Session_ID",
+              "displayName": "Session_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Canal",
+              "displayName": "Canal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Intencion",
+              "displayName": "Intencion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nombre",
+              "displayName": "Nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Producto",
+              "displayName": "Producto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Resumen",
+              "displayName": "Resumen",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Prioridad",
+              "displayName": "Prioridad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Worker_invocado",
+              "displayName": "Worker_invocado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Parametros_enviados",
+              "displayName": "Parametros_enviados",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Respuesta_worker",
+              "displayName": "Respuesta_worker",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "traceId",
+              "displayName": "traceId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bb6ba2d3-e0c7-4071-9214-fa657aa68159",
+      "name": "Log de trazabilidad (Sheets)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1680,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "yjOVMCMozE8kCjVd",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5c6f1b8d-58ff-4291-83b6-f2293e24da51",
+              "name": "output",
+              "value": "={{ $('Log de trazabilidad (Sheets)').item.json.Respuesta_worker ? JSON.parse($('Log de trazabilidad (Sheets)').item.json.Respuesta_worker).respuesta : 'Gracias por escribir a Jumade.' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6f74bf3e-fe4f-4403-857a-23b5b875c99a",
+      "name": "Respuesta al chat",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1920,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Chat Trigger": {
+      "main": [
+        [
+          {
+            "node": "Clasificador de intención",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Clasificador de intención",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clasificador de intención": {
+      "main": [
+        [
+          {
+            "node": "Limpieza de payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limpieza de payload": {
+      "main": [
+        [
+          {
+            "node": "Router por intención",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Router por intención": {
+      "main": [
+        [
+          {
+            "node": "Execute Worker Soporte",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute Worker Ventas",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Alerta a supervisor humano",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Worker Soporte": {
+      "main": [
+        [
+          {
+            "node": "Log de trazabilidad (Sheets)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Alerta a supervisor humano",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Worker Ventas": {
+      "main": [
+        [
+          {
+            "node": "Log de trazabilidad (Sheets)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Alerta a supervisor humano",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alerta a supervisor humano": {
+      "main": [
+        [
+          {
+            "node": "Respuesta fallback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respuesta fallback": {
+      "main": [
+        [
+          {
+            "node": "Log de trazabilidad (Sheets)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log de trazabilidad (Sheets)": {
+      "main": [
+        [
+          {
+            "node": "Respuesta al chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "executionTimeout": 120,
+    "saveExecutionProgress": true,
+    "binaryMode": "separate"
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "jumade"
+  }
+}
