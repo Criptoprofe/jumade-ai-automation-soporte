@@ -99,3 +99,11 @@ Entregable: **`checkpoint4_juan_manuel_depaoli.json`** (copia en la raíz y en `
 ![Rama de entrada por email con los guardrails ① y ②](modulo4/capturas/03_rama_email_entrada.png)
 
 Test de regresión: email real de soporte → contacto creado en HubSpot, borrador en Gmail, aviso en Slack, log en Sheets y memoria en Airtable; email "Automatic reply: Out of office" → descartado sin tocar CRM ni LLM; chat → camino del M3 intacto.
+
+## Pre-entrega Módulo 5 — Agente con conocimiento organizacional (RAG)
+
+Carpeta `modulo5/` (detalle en [`modulo5/README.md`](modulo5/README.md)). Los Workers de Soporte y Ventas consultan el **Manual de Soporte y Ventas de Jumade v2.1** mediante la herramienta `buscar_manual_jumade` (sub-workflow con Qdrant Vector Store, **Top-K = 4**, **Minimum Score = 0,35**), citan la sección del manual en cada respuesta y aplican la regla "No sé" cuando el dato no figura.
+
+Entregable: **`modulo5/PreEntrega_Modulo5_DepaoliJuanManuel.pdf`** — captura del parseo en LlamaCloud, parámetros de recuperación y su justificación, System Prompt RAG, reporte de validación de 5 preguntas ciegas (5/5 correctas en contenido, 4/5 en formato) y plan de gobernanza de la base de conocimiento.
+
+Pipeline: PDF → LlamaParse (LlamaCloud) → limpieza y 18 fragmentos por sección → `text-embedding-3-small` → Qdrant Cloud (`manual_jumade`) → Vector Store Retrieve Tool en los Workers.
