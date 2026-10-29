@@ -51,20 +51,19 @@
     },
     {
       "id": "e1",
-      "name": "Embeddings OpenAI (text-embedding-3-small)",
-      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
-      "typeVersion": 1.2,
+      "name": "Embeddings Gemini (gemini-embedding-001)",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
       "position": [
         400,
         240
       ],
       "parameters": {
-        "model": "text-embedding-3-small",
-        "options": {}
+        "modelName": "models/gemini-embedding-001"
       },
       "credentials": {
-        "openAiApi": {
-          "name": "n8n free OpenAI API credits"
+        "googlePalmApi": {
+          "name": "Google Gemini (AI Studio) - Jumade"
         }
       }
     },
@@ -153,23 +152,23 @@
         ]
       ]
     },
-    "Embeddings OpenAI (text-embedding-3-small)": {
-      "ai_embedding": [
-        [
-          {
-            "node": "Qdrant Vector Store (insertar)",
-            "type": "ai_embedding",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Default Data Loader (texto + metadatos)": {
       "ai_document": [
         [
           {
             "node": "Qdrant Vector Store (insertar)",
             "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Gemini (gemini-embedding-001)": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Qdrant Vector Store (insertar)",
+            "type": "ai_embedding",
             "index": 0
           }
         ]

@@ -102,8 +102,10 @@ Test de regresión: email real de soporte → contacto creado en HubSpot, borrad
 
 ## Pre-entrega Módulo 5 — Agente con conocimiento organizacional (RAG)
 
-Carpeta `modulo5/` (detalle en [`modulo5/README.md`](modulo5/README.md)). Los Workers de Soporte y Ventas consultan el **Manual de Soporte y Ventas de Jumade v2.1** mediante la herramienta `buscar_manual_jumade` (sub-workflow con Qdrant Vector Store, **Top-K = 4**, **Minimum Score = 0,35**), citan la sección del manual en cada respuesta y aplican la regla "No sé" cuando el dato no figura.
+Carpeta `modulo5/` (detalle en [`modulo5/README.md`](modulo5/README.md)). Los Workers de Soporte y Ventas consultan el **Manual de Soporte y Ventas de Jumade v2.1** mediante la herramienta `buscar_manual_jumade` (sub-workflow con Qdrant Vector Store, **Top-K = 4**, **Minimum Score = 0,62**), citan la sección del manual en cada respuesta y aplican la regla "No sé" cuando el dato no figura.
 
 Entregable: **`modulo5/PreEntrega_Modulo5_DepaoliJuanManuel.pdf`** — captura del parseo en LlamaCloud, parámetros de recuperación y su justificación, System Prompt RAG, reporte de validación de 5 preguntas ciegas (5/5 correctas en contenido, 4/5 en formato) y plan de gobernanza de la base de conocimiento.
 
-Pipeline: PDF → LlamaParse (LlamaCloud) → limpieza y 18 fragmentos por sección → `text-embedding-3-small` → Qdrant Cloud (`manual_jumade`) → Vector Store Retrieve Tool en los Workers.
+Pipeline: PDF → LlamaParse (LlamaCloud) → limpieza y 18 fragmentos por sección → `gemini-embedding-001` → Qdrant Cloud (`manual_jumade`) → Vector Store Retrieve Tool en los Workers.
+
+Desde este módulo el proyecto usa **Google Gemini** (`gemini-3.5-flash-lite`, API key gratuita de Google AI Studio) en lugar de los créditos gratuitos de OpenAI de n8n, que se agotaron.

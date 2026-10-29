@@ -39,7 +39,7 @@
             {
               "id": "a3",
               "name": "min_score",
-              "value": 0.35,
+              "value": 0.62,
               "type": "number"
             },
             {
@@ -89,19 +89,19 @@
     },
     {
       "parameters": {
-        "options": {}
+        "modelName": "models/gemini-embedding-001"
       },
       "id": "e1",
-      "name": "Embeddings OpenAI (text-embedding-3-small)",
-      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
-      "typeVersion": 1.2,
+      "name": "Embeddings Gemini (gemini-embedding-001)",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
       "position": [
         528,
         240
       ],
       "credentials": {
-        "openAiApi": {
-          "name": "n8n free OpenAI API credits"
+        "googlePalmApi": {
+          "name": "Google Gemini (AI Studio) - Jumade"
         }
       }
     },
@@ -155,7 +155,7 @@
     },
     {
       "parameters": {
-        "content": "## Vector Store Retrieve Tool (Módulo 5)\nSub-workflow que usan los Workers como herramienta `buscar_manual_jumade`.\n\n1. **Top-K = 4** y **Minimum Score = 0,35** se fijan en el nodo *Parámetros de recuperación* (un único lugar para calibrar).\n2. *Qdrant Vector Store* embebe la consulta con `text-embedding-3-small` y trae los K fragmentos más cercanos (coseno) de la colección `manual_jumade` con su `score`.\n3. El *Filter* descarta todo fragmento con similitud menor al Minimum Score.\n4. El *Code* arma un contexto citable (sección del manual + similitud) o devuelve `SIN_RESULTADOS` para que el agente responda \"No sé\".",
+        "content": "## Vector Store Retrieve Tool (Módulo 5)\nSub-workflow que usan los Workers como herramienta `buscar_manual_jumade`.\n\n1. **Top-K = 4** y **Minimum Score = 0,62** se fijan en el nodo *Parámetros de recuperación* (un único lugar para calibrar).\n2. *Qdrant Vector Store* embebe la consulta con `gemini-embedding-001` y trae los K fragmentos más cercanos (coseno) de la colección `manual_jumade` con su `score`.\n3. El *Filter* descarta todo fragmento con similitud menor al Minimum Score.\n4. El *Code* arma un contexto citable (sección del manual + similitud) o devuelve `SIN_RESULTADOS` para que el agente responda \"No sé\".",
         "height": 240,
         "width": 1300
       },
@@ -214,7 +214,7 @@
         ]
       ]
     },
-    "Embeddings OpenAI (text-embedding-3-small)": {
+    "Embeddings Gemini (gemini-embedding-001)": {
       "ai_embedding": [
         [
           {

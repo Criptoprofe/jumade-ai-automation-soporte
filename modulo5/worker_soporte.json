@@ -31,29 +31,27 @@
         280,
         0
       ],
-      "onError": "continueErrorOutput"
+      "onError": "continueErrorOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 15000
     },
     {
       "parameters": {
-        "model": {
-          "__rl": true,
-          "mode": "list",
-          "value": "gpt-5-mini",
-          "cachedResultName": "gpt-5-mini"
-        },
+        "modelName": "models/gemini-3.5-flash-lite",
         "options": {}
       },
       "id": "eaae8c06-a93c-46cd-84a1-58588ee4232f",
-      "name": "OpenAI Chat Model",
-      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "name": "Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1.2,
       "position": [
         300,
         220
       ],
       "credentials": {
-        "openAiApi": {
-          "name": "n8n free OpenAI API credits"
+        "googlePalmApi": {
+          "name": "Google Gemini (AI Studio) - Jumade"
         }
       }
     },
@@ -229,23 +227,23 @@
         ]
       ]
     },
-    "OpenAI Chat Model": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "Agente Soporte (redacción)",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "buscar_manual_jumade": {
       "ai_tool": [
         [
           {
             "node": "Agente Soporte (redacción)",
             "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente Soporte (redacción)",
+            "type": "ai_languageModel",
             "index": 0
           }
         ]

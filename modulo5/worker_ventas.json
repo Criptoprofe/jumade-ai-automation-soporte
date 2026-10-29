@@ -35,29 +35,27 @@
         460,
         0
       ],
-      "onError": "continueErrorOutput"
+      "onError": "continueErrorOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 15000
     },
     {
       "parameters": {
-        "model": {
-          "__rl": true,
-          "mode": "list",
-          "value": "gpt-5-mini",
-          "cachedResultName": "gpt-5-mini"
-        },
+        "modelName": "models/gemini-3.5-flash-lite",
         "options": {}
       },
       "id": "4789757c-e441-4981-9d39-89b4fa175c86",
-      "name": "OpenAI Chat Model",
-      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "name": "Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1.2,
       "position": [
         400,
         220
       ],
       "credentials": {
-        "openAiApi": {
-          "name": "n8n free OpenAI API credits"
+        "googlePalmApi": {
+          "name": "Google Gemini (AI Studio) - Jumade"
         }
       }
     },
@@ -254,17 +252,6 @@
         ]
       ]
     },
-    "OpenAI Chat Model": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "Extractor de lead (LLM Chain)",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Structured Output Parser": {
       "ai_outputParser": [
         [
@@ -282,6 +269,17 @@
           {
             "node": "Extractor de lead (LLM Chain)",
             "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Extractor de lead (LLM Chain)",
+            "type": "ai_languageModel",
             "index": 0
           }
         ]

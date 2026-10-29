@@ -31,29 +31,27 @@
       "position": [
         1460,
         0
-      ]
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 15000
     },
     {
       "parameters": {
-        "model": {
-          "__rl": true,
-          "mode": "list",
-          "value": "gpt-5-mini",
-          "cachedResultName": "gpt-5-mini"
-        },
+        "modelName": "models/gemini-3.5-flash-lite",
         "options": {}
       },
       "id": "0af6ff4d-3606-4d1d-83e3-52b93c3bfc8b",
-      "name": "OpenAI Chat Model",
-      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "name": "Gemini Chat Model (clasificador)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1.2,
       "position": [
         1428,
         224
       ],
       "credentials": {
-        "openAiApi": {
-          "name": "n8n free OpenAI API credits"
+        "googlePalmApi": {
+          "name": "Google Gemini (AI Studio) - Jumade"
         }
       }
     },
@@ -215,7 +213,7 @@
       ],
       "retryOnFail": true,
       "maxTries": 2,
-      "waitBetweenTries": 2000,
+      "waitBetweenTries": 15000,
       "onError": "continueErrorOutput"
     },
     {
@@ -240,7 +238,7 @@
       ],
       "retryOnFail": true,
       "maxTries": 2,
-      "waitBetweenTries": 2000,
+      "waitBetweenTries": 15000,
       "onError": "continueErrorOutput"
     },
     {
@@ -937,29 +935,27 @@
         4880,
         -200
       ],
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 15000
     },
     {
       "parameters": {
-        "model": {
-          "__rl": true,
-          "mode": "list",
-          "value": "gpt-5-nano",
-          "cachedResultName": "gpt-5-nano"
-        },
+        "modelName": "models/gemini-3.5-flash-lite",
         "options": {}
       },
       "id": "cd592e79-965c-465b-a5ad-5517a25f945e",
-      "name": "OpenAI gpt-5-nano",
-      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "name": "Gemini Flash Lite (resumidor económico)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1.2,
       "position": [
         4840,
         20
       ],
       "credentials": {
-        "openAiApi": {
-          "name": "n8n free OpenAI API credits"
+        "googlePalmApi": {
+          "name": "Google Gemini (AI Studio) - Jumade"
         }
       }
     },
@@ -1874,17 +1870,6 @@
         ]
       ]
     },
-    "OpenAI Chat Model": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "Clasificador de intención",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Clasificador de intención": {
       "main": [
         [
@@ -2114,17 +2099,6 @@
         ]
       ]
     },
-    "OpenAI gpt-5-nano": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "Resumidor (modelo económico)",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Parser JSON del resumen": {
       "ai_outputParser": [
         [
@@ -2317,6 +2291,28 @@
           {
             "node": "¿Más de 5 mensajes?",
             "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Chat Model (clasificador)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Clasificador de intención",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Flash Lite (resumidor económico)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Resumidor (modelo económico)",
+            "type": "ai_languageModel",
             "index": 0
           }
         ]
